@@ -1,0 +1,82 @@
+[project]
+name = "ai-pipeline-debugger"
+version = "0.1.0"
+description = "AI-powered debugger for data pipeline logs (Spark, Airflow) with semantic incident retrieval and LLM routing."
+requires-python = ">=3.12"
+authors = [{ name = "AI Pipeline Debugger" }]
+readme = "README.md"
+
+dependencies = [
+    # API layer
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    # Schemas & settings
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    # LLM clients
+    "openai>=1.54.0",
+    "ollama>=0.4.0",
+    "langchain-core>=0.3.0",
+    # Vector DB
+    "chromadb>=0.5.15",
+    # Ingestion / parsing helpers
+    "httpx>=0.27.0",
+    "tenacity>=9.0.0",
+    "python-dateutil>=2.9.0",
+    # Observability
+    "structlog>=24.4.0",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.39.0", "pandas>=2.2.0"]
+otel = [
+    "opentelemetry-sdk>=1.27.0",
+    "opentelemetry-exporter-otlp>=1.27.0",
+    "opentelemetry-instrumentation-fastapi>=0.48b0",
+    "opentelemetry-instrumentation-httpx>=0.48b0",
+]
+k8s = ["kubernetes>=31.0.0"]
+aws = ["boto3>=1.35.0"]
+gcp = ["google-cloud-logging>=3.11.0"]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.7.0",
+    "black>=24.10.0",
+    "mypy>=1.13.0",
+    "respx>=0.21.0",
+    "httpx>=0.27.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["api", "core", "llm", "ingestion", "vector_db", "evals", "observability"]
+
+# ---------- Tooling ----------
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --strict-markers --cov=api --cov=core --cov=llm --cov=ingestion --cov=vector_db --cov=observability"
+testpaths = ["tests"]
+asyncio_mode = "auto"
