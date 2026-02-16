@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Env
+.env
+.env.local
+
+# Data
+data/chroma_db/
+data/raw_logs/
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
