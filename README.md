@@ -16,3 +16,9 @@ of the pipeline can reason about.
 
 Supports OpenAI and a local Ollama provider via a thin `llm.router`
 abstraction. Choose a provider per request or fall back automatically.
+
+## Retrieval
+
+Past incidents are embedded into a Qdrant collection. The retriever
+returns the top-k most similar prior failures to ground the LLM
+explanation.
