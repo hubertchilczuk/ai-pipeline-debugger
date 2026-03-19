@@ -1,7 +1,7 @@
 """FastAPI application entrypoint."""
 from fastapi import FastAPI
 
-from .schemas import DebugRequest, DebugResponse
+from .schemas import DebugRequest, DebugResponse, IndexRequest
 
 app = FastAPI(title="AI Pipeline Debugger")
 
@@ -13,5 +13,9 @@ def health():
 
 @app.post("/debug", response_model=DebugResponse)
 def debug(req: DebugRequest):
-    # TODO: wire to ingestion + retrieval + llm
     return DebugResponse(explanation="stub", confidence=0.0, citations=[])
+
+
+@app.post("/index")
+def index(req: IndexRequest):
+    return {"indexed": len(req.documents)}
