@@ -22,3 +22,12 @@ abstraction. Choose a provider per request or fall back automatically.
 Past incidents are embedded into a Qdrant collection. The retriever
 returns the top-k most similar prior failures to ground the LLM
 explanation.
+
+## API
+
+A FastAPI service exposes `/debug`, `/index`, and `/health`. See
+`api/schemas.py` for request/response models.
+
+```bash
+uvicorn api.main:app --reload
+```
