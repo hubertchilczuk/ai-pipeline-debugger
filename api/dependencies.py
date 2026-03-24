@@ -33,3 +33,28 @@ def _build_indexer() -> IncidentIndexer:
 
 
 def get_indexer() -> IncidentIndexer:
+    return _build_indexer()
+
+
+@lru_cache
+def _build_retriever() -> IncidentRetriever:
+    s = get_settings()
+    return IncidentRetriever(client=get_chroma_client(), collection=s.chroma_collection)
+
+
+def get_retriever() -> IncidentRetriever:
+    return _build_retriever()
+
+
+def get_parser(router: Annotated[LLMRouter, Depends(get_router)]) -> LogParser:
+    s = get_settings()
+    # When PARSER_USE_LLM_FALLBACK=true the router itself becomes the fallback path,
+    # so unstructured logs get a second chance instead of returning UNKNOWN.
+    fallback = router if s.parser_use_llm_fallback else None
+    return LogParser(llm_fallback=fallback)
+
+
+RouterDep = Annotated[LLMRouter, Depends(get_router)]
+IndexerDep = Annotated[IncidentIndexer, Depends(get_indexer)]
+RetrieverDep = Annotated[IncidentRetriever, Depends(get_retriever)]
+ParserDep = Annotated[LogParser, Depends(get_parser)]
