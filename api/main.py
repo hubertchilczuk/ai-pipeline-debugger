@@ -21,3 +21,4 @@ def index(req: IndexRequest):
     return {"indexed": len(req.documents)}
 
 # error handlers wired
+# retry wired
