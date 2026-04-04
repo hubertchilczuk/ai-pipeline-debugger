@@ -23,3 +23,4 @@ def index(req: IndexRequest):
 # error handlers wired
 # retry wired
 # tracing wired
+# confidence scoring tweaked
