@@ -108,3 +108,67 @@ def test_analyze_happy_path(client) -> None:
     assert data["incident_id"]
 
 
+def test_analyze_returns_502_on_non_json(client, fake_payload) -> None:
+    c, fake = client
+
+    async def bad_generate(request):
+        fake.calls += 1
+        return LLMResponse(
+            content="this is not json",
+            provider=ProviderName.OLLAMA,
+            model="fake",
+            confidence_score=0.9,
+            latency_ms=1,
+        )
+
+    fake.generate = bad_generate  # type: ignore
+    resp = c.post(
+        "/analyze",
+        json={"pipeline": "etl", "stage": "x", "log_excerpt": "KeyError: bad"},
+    )
+    assert resp.status_code == 502
+
+
+def test_feedback_roundtrip(client) -> None:
+    c, _ = client
+    analyze = c.post(
+        "/analyze",
+        json={"pipeline": "etl", "stage": "x", "log_excerpt": "KeyError: bad"},
+    )
+    incident_id = analyze.json()["incident_id"]
+
+    fb = c.post(
+        "/feedback",
+        json={"incident_id": incident_id, "helpful": True, "actual_fix": "patched"},
+    )
+    assert fb.status_code == 204
+
+    view = c.get(f"/analyze/{incident_id}/feedback")
+    assert view.status_code == 200, view.text
+    body = view.json()
+    assert body["helpful"] == "yes"
+    assert body["suggested_fix"] == "patched"
+
+
+def test_get_feedback_404(client) -> None:
+    c, _ = client
+    resp = c.get("/analyze/does-not-exist/feedback")
+    assert resp.status_code == 404
+
+
+def test_analyze_batch(client) -> None:
+    c, _ = client
+    resp = c.post(
+        "/analyze/batch",
+        json={
+            "items": [
+                {"pipeline": "p1", "stage": "s", "log_excerpt": "KeyError: a"},
+                {"pipeline": "p2", "stage": "s", "log_excerpt": "KeyError: b"},
+            ],
+            "concurrency": 2,
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert len(body["results"]) == 2
+    assert body["errors"] == []
