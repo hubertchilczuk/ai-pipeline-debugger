@@ -1,0 +1,26 @@
+[
+  {
+    "id": "spark-oom-001",
+    "pipeline": "etl_users_daily",
+    "stage": "join_orders",
+    "log": "2025-01-12 03:14:21 ERROR Executor: Exception in task 0.0 in stage 4.0\norg.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 4.0 failed 4 times, most recent failure: Lost task 0.0 in stage 4.0 (TID 12, executor 7): java.lang.OutOfMemoryError: Java heap space\n  at java.util.Arrays.copyOf(Arrays.java:3236)",
+    "expected_error_type": "OutOfMemoryError",
+    "expected_severity": "high"
+  },
+  {
+    "id": "airflow-tz-002",
+    "pipeline": "report_finance",
+    "stage": "load_dim_date",
+    "log": "[2025-02-03 09:00:00,123] {taskinstance.py:1463} ERROR - Task failed with exception\nairflow.exceptions.AirflowException: Bash command failed. Exit code 2.\nTraceback (most recent call last):\n  File \"/opt/airflow/dags/report_finance.py\", line 87, in load_dim_date\n    raise AirflowException('date out of range')",
+    "expected_error_type": "AirflowException",
+    "expected_severity": "medium"
+  },
+  {
+    "id": "py-keyerror-003",
+    "pipeline": "ml_features",
+    "stage": "build_features",
+    "log": "Traceback (most recent call last):\n  File \"/app/features.py\", line 42, in build\n    return df['user_id'].fillna(0)\nKeyError: 'user_id'",
+    "expected_error_type": "KeyError",
+    "expected_severity": "medium"
+  }
+]
