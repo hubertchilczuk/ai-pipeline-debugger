@@ -68,3 +68,28 @@ class OpenAIProvider(LLMProvider):
             top_logprobs=1,
             messages=[
                 {"role": "system", "content": request.system_prompt},
+                {"role": "user", "content": request.user_prompt},
+            ],
+        )
+
+    async def health_check(self) -> bool:
+        try:
+            await self._client.models.list()
+            return True
+        except APIError:
+            return False
+
+    @staticmethod
+    def _estimate_confidence(choice) -> float:
+        """Use token logprobs when available; fall back to finish_reason heuristic."""
+        truncated = choice.finish_reason != "stop"
+        logprobs = getattr(choice, "logprobs", None)
+        token_records = getattr(logprobs, "content", None) if logprobs else None
+        if token_records:
+            # Convert logprobs -> probabilities, average across tokens.
+            probs = [math.exp(t.logprob) for t in token_records if t.logprob is not None]
+            if probs:
+                avg = sum(probs) / len(probs)
+                conf = max(0.0, min(1.0, avg))
+                return conf * (0.7 if truncated else 1.0)
+        return 0.7 if truncated else 0.95
