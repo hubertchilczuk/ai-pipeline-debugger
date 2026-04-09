@@ -93,3 +93,25 @@ class IncidentIndexer:
             parsed.message or "",
             parsed.stack_summary or "",
         ]
+        return "\n".join(p for p in parts if p)[:4000]
+
+    @staticmethod
+    def _build_metadata(raw: RawLog, parsed: ParsedLog) -> dict[str, Any]:
+        meta: dict[str, Any] = {
+            "pipeline": raw.pipeline,
+            "stage": raw.stage,
+            "source": raw.source,
+            "error_type": parsed.error_class or "Unknown",
+            "extraction_method": parsed.extraction_method.value,
+        }
+        if parsed.timestamp:
+            meta["timestamp"] = parsed.timestamp.isoformat()
+        if parsed.tags:
+            meta["tags"] = ",".join(parsed.tags)
+        return meta
+
+    @staticmethod
+    def _make_id(pipeline: str, stage: str, parsed: ParsedLog) -> str:
+        ts = parsed.timestamp.isoformat() if parsed.timestamp else "no-ts"
+        ec = parsed.error_class or "unknown"
+        return f"{pipeline}::{stage}::{ec}::{ts}"
