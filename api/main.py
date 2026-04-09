@@ -24,3 +24,4 @@ def index(req: IndexRequest):
 # retry wired
 # tracing wired
 # confidence scoring tweaked
+# trace context propagation fixed
