@@ -31,3 +31,10 @@ A FastAPI service exposes `/debug`, `/index`, and `/health`. See
 ```bash
 uvicorn api.main:app --reload
 ```
+
+## Deployment
+
+Use `docker-compose up` for the full local stack (API, UI, Qdrant).
+Production deployments should set the variables documented in
+`.env.example` and front the API with a reverse proxy that terminates
+TLS.
